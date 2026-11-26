@@ -1,0 +1,379 @@
+{% extends "base.html" %}
+
+{% block title %}SapaBatin — Dashboard Pendamping{% endblock %}
+
+{% block extra_style %}
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+    .bg-vanilla { background-color: #FDFBF7; }
+    .bg-blush { background-color: #F7EBE8; }
+    .bg-rosewood { background-color: #8C4A48; }
+    .text-rosewood { color: #8C4A48; }
+    .bg-sage { background-color: #D3E0DC; }
+    .text-lagoon { color: #1A3C40; }
+    .bg-lagoon { background-color: #1A3C40; }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="max-w-5xl w-full mx-auto px-4 py-8 flex-grow space-y-6">
+    <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 md:p-8">
+        <div class="flex flex-wrap justify-between items-center gap-3 pb-4 border-b border-gray-100">
+            <div>
+                <h1 class="text-2xl font-bold text-rosewood">🛡️ Dashboard Pendamping & Alarm Darurat</h1>
+                <p class="text-sm text-gray-500 mt-1">
+                    Selamat datang, Tim Pendamping! Halaman ini terhubung ke seluruh aktivitas web (Mood Tracker, Diari/Chat AI, Ruang Pendampingan Langsung, dan Laporan Digital).
+                </p>
+            </div>
+            <a href="/owner-logout" class="bg-rosewood text-white text-sm font-semibold px-4 py-2 rounded-xl hover:opacity-90 transition">
+                🔒 Keluar
+            </a>
+        </div>
+
+        <!-- 0. PANEL TIM PENDAMPING MENGHUBUNGI PENGGUNA (MASALAH SERIUS) -->
+        <section class="mt-6 bg-blush/50 border border-rose-200 rounded-2xl p-5 shadow-sm">
+            <div class="flex flex-wrap justify-between items-center gap-2 mb-3">
+                <div>
+                    <h2 class="text-lg font-bold text-rosewood">🩺 Hubungi Pengguna (Penanganan Masalah Serius)</h2>
+                    <p class="text-xs text-gray-600">
+                        Kirim pesan pendampingan langsung ke ruang chat pengguna atau hubungi kontak yang ditinggalkan pengguna.
+                    </p>
+                </div>
+            </div>
+
+            <form id="owner-reply-form" class="space-y-3">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div>
+                        <label for="target-user" class="block text-xs font-bold text-gray-700 mb-1">Nama / ID Pengguna Tujuan</label>
+                        <input
+                            type="text"
+                            id="target-user"
+                            placeholder="Contoh: Pengguna Anonim / Triela"
+                            value="Pengguna Anonim"
+                            class="w-full px-3.5 py-2 border border-gray-300 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-rose-800"
+                            required
+                        >
+                    </div>
+                    <div>
+                        <label for="kontak-tujuan" class="block text-xs font-bold text-gray-700 mb-1">Kontak Pengguna (WA / Telp / Email)</label>
+                        <input
+                            type="text"
+                            id="kontak-tujuan"
+                            placeholder="Contoh: 0812xxxx atau email@..."
+                            class="w-full px-3.5 py-2 border border-gray-300 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-rose-800"
+                        >
+                    </div>
+                    <div>
+                        <label for="prioritas-pesan" class="block text-xs font-bold text-gray-700 mb-1">Tingkat Penanganan</label>
+                        <select
+                            id="prioritas-pesan"
+                            class="w-full px-3.5 py-2 border border-gray-300 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-rose-800"
+                        >
+                            <option value="DARURAT / KRISIS">🚨 Darurat / Krisis Keselamatan</option>
+                            <option value="PENDAMPINGAN SERIUS">🩺 Pendampingan Masalah Serius</option>
+                            <option value="TINDAK LANJUT LAPORAN">⚖️ Tindak Lanjut Laporan Digital</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="pesan-ke-pengguna" class="block text-xs font-bold text-gray-700 mb-1">Pesan Langsung dari Tim Pendamping untuk Pengguna</label>
+                    <textarea
+                        id="pesan-ke-pengguna"
+                        rows="3"
+                        placeholder="Contoh: Halo, ini Tim Pendamping SapaBatin. Kami sudah membaca kondisimu dan siap mendampingimu sekarang. Jika berkenan, balas pesan ini atau hubungi nomor pendamping darurat di..."
+                        class="w-full px-3.5 py-2.5 border border-gray-300 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-rose-800"
+                        required
+                    ></textarea>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div id="quick-contact-links" class="flex flex-wrap gap-2 text-xs"></div>
+                    <button
+                        type="submit"
+                        class="bg-rosewood text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:opacity-90 transition shadow-sm"
+                    >
+                        Kirim Pesan ke Pengguna
+                    </button>
+                </div>
+            </form>
+
+            <div id="owner-reply-feedback" class="hidden mt-3 p-3 rounded-xl text-xs font-medium"></div>
+
+            {% if data.balasan_owner %}
+                <div class="mt-4 pt-4 border-t border-rose-200/70">
+                    <p class="text-xs font-bold text-gray-700 mb-2">Riwayat Pesan Terkirim dari Tim Pendamping:</p>
+                    <div class="space-y-2 max-h-48 overflow-y-auto pr-1">
+                        {% for b in data.balasan_owner %}
+                            <div class="bg-white border border-gray-200 rounded-xl p-3 text-xs">
+                                <div class="flex flex-wrap justify-between gap-1 font-semibold text-lagoon">
+                                    <span>Kepada: {{ b.target_user }} ({{ b.prioritas }})</span>
+                                    <span class="font-normal text-gray-500">{{ b.waktu }}</span>
+                                </div>
+                                <p class="text-gray-700 mt-1 whitespace-pre-line">{{ b.pesan }}</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </section>
+
+        <!-- 1. ALARM & PERINGATAN DARURAT -->
+        <section class="mt-6">
+            <h2 class="text-lg font-bold text-gray-900 mb-3">🚨 Daftar Alarm & Peringatan Darurat (Krisis / Tren Mood Sulit)</h2>
+            {% if data.laporan_darurat %}
+                <div class="space-y-3">
+                    {% for alarm in data.laporan_darurat %}
+                        <div class="bg-red-50 border border-red-200 rounded-xl p-4">
+                            <div class="flex flex-wrap justify-between items-center gap-2 mb-1">
+                                <span class="text-xs font-bold uppercase tracking-wide text-red-800 bg-red-100 px-2.5 py-1 rounded-full">
+                                    {{ alarm.kategori or alarm.tingkat or 'PERINGATAN' }}
+                                </span>
+                                <span class="text-xs text-gray-500">{{ alarm.waktu }}</span>
+                            </div>
+                            {% if alarm.kontak and alarm.kontak != '-' %}
+                                <p class="text-xs text-gray-700 mt-1">
+                                    Kontak: <strong>{{ alarm.kontak }}</strong>
+                                </p>
+                            {% endif %}
+                            <p class="text-sm text-gray-800 whitespace-pre-line mt-2">{{ alarm.pesan }}</p>
+                            {% if alarm.kontak and alarm.kontak != '-' %}
+                                <button
+                                    type="button"
+                                    onclick="pilihPenggunaUntukDihubungi('{{ (alarm.user or 'Pengguna Anonim')|e }}', '{{ alarm.kontak|e }}')"
+                                    class="mt-2.5 text-xs font-semibold bg-rosewood text-white px-3 py-1.5 rounded-lg hover:opacity-90 transition"
+                                >
+                                    📞 Hubungi Pengguna Ini
+                                </button>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="bg-red-50/60 border border-red-100 rounded-xl p-4 text-sm text-gray-600">
+                    Belum ada alarm darurat atau peringatan krisis saat ini.
+                </div>
+            {% endif %}
+        </section>
+
+        <!-- 2. PESAN LANGSUNG DARI RUANG PENDAMPINGAN LANGSUNG -->
+        <section class="mt-8">
+            <h2 class="text-lg font-bold text-gray-900 mb-3">🙋‍♀️ Pesan Masuk dari Ruang Pendampingan Langsung</h2>
+            {% if data.pesan_owner %}
+                <div class="space-y-3">
+                    {% for msg in data.pesan_owner %}
+                        <div class="bg-blush/60 border border-rose-200 rounded-xl p-4">
+                            <div class="flex flex-wrap justify-between items-center gap-2 mb-2">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span class="font-bold text-sm text-gray-900">{{ msg.user }}</span>
+                                    <span class="text-xs text-gray-600 bg-white px-2.5 py-0.5 rounded-full border border-gray-200">
+                                        Kontak: {{ msg.kontak }}
+                                    </span>
+                                    <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full {{ 'bg-red-100 text-red-800' if 'DARURAT' in msg.status else 'bg-sage text-lagoon' }}">
+                                        {{ msg.status }}
+                                    </span>
+                                </div>
+                                <span class="text-xs text-gray-500">{{ msg.waktu }}</span>
+                            </div>
+                            <p class="text-sm text-gray-800 whitespace-pre-line">{{ msg.pesan }}</p>
+                            <div class="mt-2.5 flex flex-wrap gap-2">
+                                <button
+                                    type="button"
+                                    onclick="pilihPenggunaUntukDihubungi('{{ (msg.user or 'Pengguna Anonim')|e }}', '{{ (msg.kontak or '')|e }}')"
+                                    class="text-xs font-semibold bg-lagoon text-white px-3 py-1.5 rounded-lg hover:opacity-90 transition"
+                                >
+                                    ✉️ Balas / Hubungi Pengguna Ini
+                                </button>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="bg-vanilla border border-gray-200 rounded-xl p-4 text-sm text-gray-500">
+                    Belum ada pesan langsung dari pengguna di Ruang Pendampingan Langsung.
+                </div>
+            {% endif %}
+        </section>
+
+        <!-- 3. RIWAYAT CHAT AI -->
+        <section class="mt-8">
+            <h2 class="text-lg font-bold text-gray-900 mb-3">💬 Pemantauan Riwayat Curhat / Chat AI Terbaru</h2>
+            {% if data.riwayat_chat %}
+                <div class="bg-vanilla border border-gray-200 rounded-xl p-4 space-y-3 max-h-72 overflow-y-auto">
+                    {% for chat in data.riwayat_chat %}
+                        <div class="pb-2.5 border-b border-gray-100 last:border-b-0 last:pb-0 text-sm">
+                            <span class="font-bold text-gray-900">{{ chat.user }}:</span>
+                            <span class="text-gray-700">{{ chat.pesan }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="bg-vanilla border border-gray-200 rounded-xl p-4 text-sm text-gray-500">
+                    Belum ada riwayat chat.
+                </div>
+            {% endif %}
+        </section>
+
+        <!-- 4. RIWAYAT MOOD & LAPORAN CYBERBULLYING -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+            <section>
+                <h2 class="text-base font-bold text-gray-900 mb-3">📊 Riwayat Mood Tracker</h2>
+                {% if data.riwayat_mood %}
+                    <div class="space-y-3 max-h-96 overflow-y-auto pr-1">
+                        {% for mood in data.riwayat_mood %}
+                            <div class="bg-vanilla border border-gray-200 rounded-xl p-4 text-sm shadow-sm">
+                                <div class="font-semibold text-lagoon">
+                                    {{ mood.user }} — Skor Mood: {{ mood.skor }}/5
+                                    <span class="text-xs font-normal text-gray-500">({{ mood.waktu }})</span>
+                                </div>
+                                <p class="text-xs text-gray-600 mt-1">
+                                    Kontak: <span class="font-semibold text-lagoon">{{ mood.kontak or '-' }}</span>
+                                </p>
+                                {% if mood.kontak and mood.kontak != '-' %}
+                                    <button
+                                        type="button"
+                                        onclick="pilihPenggunaUntukDihubungi('{{ (mood.user or 'Remaja SapaBatin')|e }}', '{{ mood.kontak|e }}')"
+                                        class="mt-2 text-xs font-semibold bg-lagoon text-white px-3 py-1.5 rounded-lg hover:opacity-90 transition"
+                                    >
+                                        📞 Hubungi Pengguna Ini
+                                    </button>
+                                {% endif %}
+                                <p class="text-gray-700 text-xs mt-1.5 whitespace-pre-line leading-relaxed">
+                                    <strong>Catatan:</strong> {{ mood.catatan }}
+                                </p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="bg-vanilla border border-gray-200 rounded-xl p-4 text-sm text-gray-500">
+                        Belum ada data mood tracker masuk.
+                    </div>
+                {% endif %}
+            </section>
+
+            <section>
+                <h2 class="text-base font-bold text-gray-900 mb-3">⚖️ Laporan Cyberbullying / Harassment</h2>
+                {% if data.laporan_cyberbullying %}
+                    <div class="space-y-3 max-h-96 overflow-y-auto pr-1">
+                        {% for lap in data.laporan_cyberbullying %}
+                            <div class="bg-vanilla border border-gray-200 rounded-xl p-4 text-sm shadow-sm">
+                                <div class="font-semibold text-rosewood">
+                                    {{ lap.kategori }}
+                                    <span class="text-xs font-normal text-gray-500">({{ lap.waktu }})</span>
+                                </div>
+                                <p class="text-gray-700 text-xs mt-1.5 whitespace-pre-line leading-relaxed">{{ lap.kronologi }}</p>
+                                <p class="text-gray-600 text-xs mt-2"><strong>Bukti Teks:</strong> {{ lap.bukti }}</p>
+
+                                {% if lap.foto_bukti %}
+                                    <div class="mt-3">
+                                        <p class="text-xs font-semibold text-lagoon mb-1.5">
+                                            Foto Bukti Terlampir ({{ lap.foto_bukti|length }}):
+                                        </p>
+                                        <div class="grid grid-cols-2 gap-2">
+                                            {% for foto in lap.foto_bukti %}
+                                                <a href="{{ foto.url }}" target="_blank" rel="noopener noreferrer" class="block border border-gray-200 rounded-lg overflow-hidden bg-white p-1">
+                                                    <img src="{{ foto.url }}" alt="{{ foto.nama_asli }}" class="w-full h-24 object-cover rounded hover:opacity-90 transition">
+                                                    <span class="block text-[11px] text-gray-600 truncate mt-1 px-0.5">{{ foto.nama_asli }}</span>
+                                                </a>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="bg-vanilla border border-gray-200 rounded-xl p-4 text-sm text-gray-500">
+                        Belum ada laporan masuk.
+                    </div>
+                {% endif %}
+            </section>
+        </div>
+    </div>
+</main>
+
+<script>
+    const targetUserInput = document.getElementById('target-user');
+    const kontakTujuanInput = document.getElementById('kontak-tujuan');
+    const quickContactLinks = document.getElementById('quick-contact-links');
+    const ownerReplyForm = document.getElementById('owner-reply-form');
+    const ownerReplyFeedback = document.getElementById('owner-reply-feedback');
+
+    function updateTombolKontakCepat(kontakRaw) {
+        quickContactLinks.innerHTML = '';
+        const teks = (kontakRaw || '').trim();
+        if (!teks || teks === '-' || teks.toLowerCase().includes('tidak dicantumkan')) return;
+
+        // Deteksi nomor HP/WA (9-15 digit)
+        const digits = teks.replace(/[^0-9]/g, '');
+        if (digits.length >= 9 && digits.length <= 15) {
+            const waNum = digits.startsWith('0') ? '62' + digits.slice(1) : digits;
+            const waLink = document.createElement('a');
+            waLink.href = `https://wa.me/${waNum}`;
+            waLink.target = '_blank';
+            waLink.rel = 'noopener noreferrer';
+            waLink.className = 'bg-emerald-600 text-white px-3 py-1.5 rounded-lg font-semibold hover:opacity-90 transition';
+            waLink.innerText = `💬 Hubungi via WhatsApp (${digits})`;
+            quickContactLinks.appendChild(waLink);
+        }
+
+        // Deteksi alamat email
+        const emailMatch = teks.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
+        if (emailMatch) {
+            const mailLink = document.createElement('a');
+            mailLink.href = `mailto:${emailMatch[0]}?subject=Pendampingan%20SapaBatin`;
+            mailLink.className = 'bg-sky-700 text-white px-3 py-1.5 rounded-lg font-semibold hover:opacity-90 transition';
+            mailLink.innerText = `📧 Kirim Email (${emailMatch[0]})`;
+            quickContactLinks.appendChild(mailLink);
+        }
+    }
+
+    function pilihPenggunaUntukDihubungi(namaUser, kontakUser) {
+        targetUserInput.value = namaUser || 'Pengguna Anonim';
+        kontakTujuanInput.value = kontakUser || '';
+        updateTombolKontakCepat(kontakUser);
+        document.getElementById('pesan-ke-pengguna').focus();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    kontakTujuanInput.addEventListener('input', () => {
+        updateTombolKontakCepat(kontakTujuanInput.value);
+    });
+
+    ownerReplyForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const targetUser = targetUserInput.value.trim() || 'Pengguna Anonim';
+        const kontakTujuan = kontakTujuanInput.value.trim() || '-';
+        const prioritas = document.getElementById('prioritas-pesan').value;
+        const pesan = document.getElementById('pesan-ke-pengguna').value.trim();
+
+        try {
+            const res = await fetch('/api/owner-kirim-pesan', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    target_user: targetUser,
+                    kontak_tujuan: kontakTujuan,
+                    prioritas: prioritas,
+                    pesan: pesan
+                })
+            });
+            const data = await res.json();
+            ownerReplyFeedback.classList.remove('hidden');
+
+            if (res.ok) {
+                ownerReplyFeedback.className = 'mt-3 p-3 rounded-xl text-xs font-medium bg-emerald-50 text-emerald-900 border border-emerald-200';
+                ownerReplyFeedback.innerText = data.message;
+                document.getElementById('pesan-ke-pengguna').value = '';
+            } else {
+                ownerReplyFeedback.className = 'mt-3 p-3 rounded-xl text-xs font-medium bg-red-50 text-red-900 border border-red-200';
+                ownerReplyFeedback.innerText = data.message || 'Gagal mengirim pesan.';
+            }
+        } catch (err) {
+            ownerReplyFeedback.classList.remove('hidden');
+            ownerReplyFeedback.className = 'mt-3 p-3 rounded-xl text-xs font-medium bg-red-50 text-red-900 border border-red-200';
+            ownerReplyFeedback.innerText = 'Terjadi kendala koneksi saat mengirim pesan ke pengguna.';
+        }
+    });
+</script>
+{% endblock %}

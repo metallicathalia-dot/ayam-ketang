@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SapaBatin{% endblock %}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --vanilla-cream: #FFF7E6;
+            --blush-petal: #F7C8D3;
+            --rosewood: #B46A72;
+            --sage-leaf: #A8B58A;
+            --misty-sky: #A9B7C6;
+            --midnight-lagoon: #2D3A47;
+            --white: #FFFFFF;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background-color: var(--vanilla-cream); color: var(--midnight-lagoon); line-height: 1.6; }
+        header { background-color: var(--midnight-lagoon); color: var(--vanilla-cream); padding: 1.2rem 5%; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 12px rgba(45, 58, 71, 0.1); }
+        .logo { font-size: 1.5rem; font-weight: 700; color: var(--blush-petal); text-decoration: none; }
+        nav a { color: var(--vanilla-cream); text-decoration: none; margin-left: 1.2rem; font-weight: 500; transition: color 0.3s; font-size: 0.95rem; }
+        nav a:hover, nav a.active { color: var(--blush-petal); }
+        .container { max-width: 900px; margin: 2.5rem auto; padding: 0 1.5rem; }
+        .card { background-color: var(--white); border-radius: 18px; padding: 2rem; box-shadow: 0 8px 24px rgba(45, 58, 71, 0.06); border: 1px solid rgba(169, 183, 198, 0.3); }
+        .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem; border-bottom: 2px solid var(--vanilla-cream); padding-bottom: 0.8rem; }
+        .card-title { font-size: 1.4rem; font-weight: 700; color: var(--rosewood); }
+        .badge { background-color: var(--sage-leaf); color: var(--white); padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+        .btn-primary { background-color: var(--rosewood); color: var(--white); border: none; padding: 0.8rem 1.5rem; border-radius: 12px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; text-decoration: none; display: inline-block; }
+        .btn-primary:hover { opacity: 0.9; }
+        input, textarea, select { width: 100%; padding: 0.8rem 1rem; border-radius: 12px; border: 1px solid var(--misty-sky); font-size: 0.95rem; outline: none; margin-top: 0.4rem; }
+        input:focus, textarea:focus, select:focus { border-color: var(--rosewood); }
+        .status-box { margin-top: 1rem; padding: 1rem; border-radius: 12px; background-color: var(--vanilla-cream); border-left: 4px solid var(--sage-leaf); display: none; }
+        .status-box.alert { background-color: #FDECEA; border-left-color: var(--rosewood); color: #7A232C; }
+        footer { text-align: center; padding: 2rem; background-color: var(--midnight-lagoon); color: var(--misty-sky); margin-top: 3rem; font-size: 0.9rem; }
+    </style>
+    {% block extra_style %}{% endblock %}
+</head>
+<body>
+
+<header>
+    <a href="/" class="logo">SapaBatin</a>
+    <nav>
+        <a href="/">Home</a>
+        <a href="/mood">Mood Tracker</a>
+        <a href="/diari-ai">Diari & AI</a>
+        <a href="/literasi">Literasi & Lapor</a>
+        <a href="/owner-dashboard" style="color: var(--blush-petal); font-weight: 700;">Dashboard Pendamping</a>
+    </nav>
+</header>
+
+{% block content %}{% endblock %}
+
+<footer>
+    SapaBatin &copy; 2026 — Kamu Berharga, Kamu Tidak Sendirian.
+</footer>
+
+</body>
+</html>
